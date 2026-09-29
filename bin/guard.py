@@ -16,6 +16,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+from importlib import import_module
+
 import argparse
 import asyncio
 from collections import defaultdict
@@ -38,11 +40,12 @@ except ImportError:
 libpath = os.path.dirname(os.path.abspath(__file__))
 sys.path[:0] = [os.path.join(libpath, os.pardir)]
 
-from pan_chainguard import title, __version__
-import pan_chainguard.util
+_pan_chainguard = import_module("pan_chainguard")
+title, __version__ = _pan_chainguard.title, _pan_chainguard.__version__
+pan_chainguard_util = import_module("pan_chainguard.util")
 
 # XXX keep compatible with sequence based naming for now
-NAME_RE = pan_chainguard.util.NAME_RE_COMPAT
+NAME_RE = pan_chainguard_util.NAME_RE_COMPAT
 
 args = None
 
@@ -505,9 +508,9 @@ def update_certs(xapi, xpath):
 
     new = {}
     try:
-        data = pan_chainguard.util.read_cert_archive(
+        data = pan_chainguard_util.read_cert_archive(
             path=args.certs)
-    except pan_chainguard.util.UtilError as e:
+    except pan_chainguard_util.UtilError as e:
         print(str(e), file=sys.stderr)
         sys.exit(1)
 
@@ -517,7 +520,7 @@ def update_certs(xapi, xpath):
         cert_type, content = data[sha256]
         if cert_type not in args.type:
             continue
-        cert_name = pan_chainguard.util.hash_to_name(sha256=sha256)
+        cert_name = pan_chainguard_util.hash_to_name(sha256=sha256)
         new[cert_name] = content
 
     old_set = set(old)
@@ -726,7 +729,7 @@ def show_tree(xapi, xpath):
                 add_children(x['cert-name'], x['subject-hash'])
 
     def format_stats(tree):
-        stats = pan_chainguard.util.stats_from_tree(tree=tree)
+        stats = pan_chainguard_util.stats_from_tree(tree=tree)
 
         for k, v in stats.items():
             name = k.replace('_', ' ').title()
@@ -850,7 +853,7 @@ def api_request(xapi, func, kwargs, status=None, status_code=None):
                      if xapi.status_detail is not None
                      else '')
     if (status is not None and
-       not pan_chainguard.util.s1_in_s2(xapi.status, status)):
+       not pan_chainguard_util.s1_in_s2(xapi.status, status)):
         print('%s: %s:%s status %s != %s' %
               (func.__name__, kwargs, xapi.status_detail,
                xapi.status, status),
@@ -858,7 +861,7 @@ def api_request(xapi, func, kwargs, status=None, status_code=None):
         sys.exit(1)
 
     if (status_code is not None and
-       not pan_chainguard.util.s1_in_s2(xapi.status_code, status_code)):
+       not pan_chainguard_util.s1_in_s2(xapi.status_code, status_code)):
         print('%s: %s:%s status_code %s != %s' %
               (func.__name__, kwargs, status_detail,
                xapi.status_code, status_code),

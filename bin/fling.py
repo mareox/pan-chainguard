@@ -19,6 +19,7 @@
 import argparse
 import asyncio
 import io
+import importlib
 import logging
 import os
 import sys
@@ -35,8 +36,10 @@ except ImportError:
 libpath = os.path.dirname(os.path.abspath(__file__))
 sys.path[:0] = [os.path.join(libpath, os.pardir)]
 
-from pan_chainguard import title, __version__
-from pan_chainguard.util import s1_in_s2
+pan_chainguard = importlib.import_module('pan_chainguard')
+title = pan_chainguard.title
+__version__ = pan_chainguard.__version__
+s1_in_s2 = importlib.import_module('pan_chainguard.util').s1_in_s2
 
 args = None
 

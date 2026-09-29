@@ -28,10 +28,10 @@ from treelib import Node, Tree
 libpath = os.path.dirname(os.path.abspath(__file__))
 sys.path[:0] = [os.path.join(libpath, os.pardir)]
 
-from pan_chainguard import title, __version__
-from pan_chainguard.ccadb import *
-from pan_chainguard.mozilla import MozillaOneCrl, MozillaError
-import pan_chainguard.util
+from pan_chainguard import title, __version__  # noqa: E402
+from pan_chainguard.ccadb import TrustBits, derived_trust_bits, revoked, valid_from_to  # noqa: E402
+from pan_chainguard.mozilla import MozillaOneCrl, MozillaError  # noqa: E402
+import pan_chainguard.util  # noqa: E402
 
 args = None
 

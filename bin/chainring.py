@@ -22,6 +22,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from html import escape
 import json
+import importlib
 import os
 import pprint
 import sys
@@ -31,9 +32,14 @@ from treelib import Tree
 libpath = os.path.dirname(os.path.abspath(__file__))
 sys.path[:0] = [os.path.join(libpath, os.pardir)]
 
-from pan_chainguard import title, __version__
-from pan_chainguard.ccadb import root_status_bits_flag, root_status_bits
-import pan_chainguard.util
+_pan_chainguard = importlib.import_module("pan_chainguard")
+title = _pan_chainguard.title
+__version__ = _pan_chainguard.__version__
+_pan_ccadb = importlib.import_module("pan_chainguard.ccadb")
+root_status_bits_flag = _pan_ccadb.root_status_bits_flag
+root_status_bits = _pan_ccadb.root_status_bits
+pan_chainguard_util = importlib.import_module("pan_chainguard.util")
+
 
 args = None
 
@@ -61,7 +67,7 @@ def format_text(tree):
 
 
 def format_stats(tree):
-    stats = pan_chainguard.util.stats_from_tree(tree=tree)
+    stats = pan_chainguard_util.stats_from_tree(tree=tree)
 
     for k, v in stats.items():
         name = k.replace('_', ' ').title()
@@ -155,7 +161,7 @@ Intermediate Certificates: {tree_to_html.intermediates}<br>
         html += '<h2>Certificate Tree</h2>\n'
     html += tree_html
     if args.verbose:
-        stats = pan_chainguard.util.stats_from_tree(tree=tree)
+        stats = pan_chainguard_util.stats_from_tree(tree=tree)
         stats_ = ''
         for k, v in stats.items():
             name = k.replace('_', ' ').title()

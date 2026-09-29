@@ -20,6 +20,7 @@ import argparse
 import asyncio
 import csv
 import json
+from importlib import import_module
 import os
 import pprint
 import sys
@@ -27,12 +28,15 @@ import sys
 libpath = os.path.dirname(os.path.abspath(__file__))
 sys.path[:0] = [os.path.join(libpath, os.pardir)]
 
-from pan_chainguard import title, __version__
-from pan_chainguard.ccadb import (revoked, valid_from_to,
-                                  root_status_bits_flag, RootStatusBits,
-                                  root_trust_bits, TrustBits, TrustBitsMap2,
-                                  CcadbRootTrustSettings, CcadbError)
-import pan_chainguard.util
+_pan_chainguard = import_module("pan_chainguard")
+title, __version__ = _pan_chainguard.title, _pan_chainguard.__version__
+_ccadb = import_module("pan_chainguard.ccadb")
+revoked, valid_from_to = _ccadb.revoked, _ccadb.valid_from_to
+root_status_bits_flag, RootStatusBits = _ccadb.root_status_bits_flag, _ccadb.RootStatusBits
+root_trust_bits, TrustBits = _ccadb.root_trust_bits, _ccadb.TrustBits
+TrustBitsMap2 = _ccadb.TrustBitsMap2
+CcadbRootTrustSettings, CcadbError = _ccadb.CcadbRootTrustSettings, _ccadb.CcadbError
+pan_chainguard_util = import_module("pan_chainguard.util")
 
 
 DEFAULT_POLICY = {
@@ -337,9 +341,9 @@ def write_fingerprints(policy_certs):
         data.append(row)
 
     try:
-        pan_chainguard.util.write_fingerprints(path=args.fingerprints,
+        pan_chainguard_util.write_fingerprints(path=args.fingerprints,
                                                data=data)
-    except pan_chainguard.util.UtilError as e:
+    except pan_chainguard_util.UtilError as e:
         print('%s: %s' % (args.fingerprints, e), file=sys.stderr)
         sys.exit(1)
 

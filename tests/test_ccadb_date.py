@@ -1,8 +1,7 @@
 from datetime import timedelta
 import unittest
 
-from pan_chainguard.ccadb import *
-from pan_chainguard.ccadb import _now
+from pan_chainguard.ccadb import _now, valid_from, valid_from_to, valid_to
 
 FMT = '%Y.%m.%d'
 VALID_FROM = 'Valid From (GMT)'

@@ -1,7 +1,18 @@
 import unittest
 
-from pan_chainguard.ccadb import *
-from pan_chainguard.ccadb import TrustBitsMap
+from pan_chainguard.ccadb import (
+    RootStatusBits,
+    TrustBits,
+    TrustBitsMap,
+    derived_trust_bits,
+    derived_trust_bits_list,
+    revoked,
+    root_status_bits,
+    root_status_bits_flag,
+    root_trust_bits,
+    root_trust_bits_list,
+    trust_bits_flag,
+)
 
 REVOCATION_STATUS = 'Revocation Status'
 DERIVED_TRUST_BITS = 'Derived Trust Bits'  # Intermediate Certificate
@@ -131,10 +142,8 @@ class CcadbTest(unittest.TestCase):
             "Chrome Status": "Not Included",
             "Microsoft Status": "Not Included",
         }
-        r = RootStatusBits.NONE
-
         with self.assertRaises(ValueError) as e:
-            bits = root_status_bits_flag(row)
+            root_status_bits_flag(row)
         x = ('certificate type "Intermediate Certificate" '
              'not "Root Certificate"')
         self.assertEqual(str(e.exception), x)
@@ -147,10 +156,8 @@ class CcadbTest(unittest.TestCase):
             "Chrome Status": "Not Included",
             "Microsoft Status": "Not Included",
         }
-        r = RootStatusBits.NONE
-
         bits = root_status_bits_flag(row)
-        self.assertEqual(bits, r)
+        self.assertEqual(bits, RootStatusBits.NONE)
         r = root_status_bits(bits)
         self.assertEqual(r, [])
 

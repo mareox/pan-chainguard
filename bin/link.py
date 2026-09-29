@@ -18,6 +18,7 @@
 
 import aiohttp
 import argparse
+import importlib
 import asyncio
 import os
 import sys
@@ -26,11 +27,14 @@ import time
 libpath = os.path.dirname(os.path.abspath(__file__))
 sys.path[:0] = [os.path.join(libpath, os.pardir)]
 
-from pan_chainguard import title, __version__
-from pan_chainguard.ccadb import *
-from pan_chainguard.crtsh import ArgsError, CrtShApi
-import pan_chainguard.mozilla
-import pan_chainguard.util
+pan_chainguard = importlib.import_module("pan_chainguard")
+title, __version__ = pan_chainguard.title, pan_chainguard.__version__
+ArgsError, CrtShApi = (
+    importlib.import_module("pan_chainguard.crtsh").ArgsError,
+    importlib.import_module("pan_chainguard.crtsh").CrtShApi,
+)
+mozilla = importlib.import_module("pan_chainguard.mozilla")
+util = importlib.import_module("pan_chainguard.util")
 
 MAX_TASKS = 3  # concurrent crt.sh API requests
 CRT_SH_TIMEOUT = 60
@@ -48,7 +52,7 @@ def main():
 
 
 async def main_loop():
-    if not pan_chainguard.util.is_writable(args.certs_new):
+    if not util.is_writable(args.certs_new):
         print('%s: not writable' % args.certs_new, file=sys.stderr)
         sys.exit(1)
 
@@ -56,8 +60,8 @@ async def main_loop():
     for x in args.fingerprints:
         try:
             fingerprints.extend(
-                pan_chainguard.util.read_fingerprints(path=x))
-        except pan_chainguard.util.UtilError as e:
+                util.read_fingerprints(path=x))
+        except util.UtilError as e:
             print(str(e), file=sys.stderr)
             sys.exit(1)
 
@@ -66,26 +70,26 @@ async def main_loop():
         for x in args.certs_mozilla:
             try:
                 mozilla.append(
-                    pan_chainguard.mozilla.MozillaCaCerts(path=x))
-            except pan_chainguard.mozilla.MozillaError as e:
+                    mozilla.MozillaCaCerts(path=x))
+            except mozilla.MozillaError as e:
                 print(str(e), file=sys.stderr)
                 sys.exit(1)
 
     certs_old = {}
     if args.certs_old:
         try:
-            certs_old = pan_chainguard.util.read_cert_archive(
+            certs_old = util.read_cert_archive(
                 path=args.certs_old)
-        except pan_chainguard.util.UtilError as e:
+        except util.UtilError as e:
             print(str(e), file=sys.stderr)
             sys.exit(1)
 
     errors, certs = await get_certs(fingerprints, mozilla, certs_old)
 
     try:
-        pan_chainguard.util.write_cert_archive(
+        util.write_cert_archive(
             path=args.certs_new, data=certs)
-    except pan_chainguard.util.UtilError as e:
+    except util.UtilError as e:
         print(str(e), file=sys.stderr)
         sys.exit(1)
 

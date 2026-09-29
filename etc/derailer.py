@@ -16,6 +16,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+from importlib import import_module
+
 import aiohttp
 import argparse
 import asyncio
@@ -40,8 +42,10 @@ except ImportError:
 libpath = os.path.dirname(os.path.abspath(__file__))
 sys.path[:0] = [os.path.join(libpath, os.pardir)]
 
-from pan_chainguard import title, __version__
-from pan_chainguard.ccadb import revoked, valid_from, valid_to
+_pan_chainguard = import_module("pan_chainguard")
+title, __version__ = _pan_chainguard.title, _pan_chainguard.__version__
+pan_chainguard_ccadb = import_module("pan_chainguard.ccadb")
+revoked, valid_from, valid_to = (pan_chainguard_ccadb.revoked, pan_chainguard_ccadb.valid_from, pan_chainguard_ccadb.valid_to)
 
 DOWNLOAD_TIMEOUT = 5
 

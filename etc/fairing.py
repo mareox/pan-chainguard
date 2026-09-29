@@ -18,6 +18,8 @@
 
 # reduce aerodynamic drag
 
+from importlib import import_module
+
 import argparse
 import asyncio
 import base64
@@ -43,8 +45,9 @@ except ImportError:
 libpath = os.path.dirname(os.path.abspath(__file__))
 sys.path[:0] = [os.path.join(libpath, os.pardir)]
 
-from pan_chainguard import title, __version__
-import pan_chainguard.util
+_pan_chainguard = import_module("pan_chainguard")
+title, __version__ = _pan_chainguard.title, _pan_chainguard.__version__
+pan_chainguard_util = import_module("pan_chainguard.util")
 
 # for custom showwarning()
 _current_cert_id = contextvars.ContextVar('current_cert_id', default=None)
@@ -65,7 +68,7 @@ def main():
 
 
 async def main_loop():
-    if args.certs_new and not pan_chainguard.util.is_writable(args.certs_new):
+    if args.certs_new and not pan_chainguard_util.is_writable(args.certs_new):
         print('%s: not writable' % args.certs_new, file=sys.stderr)
         sys.exit(1)
 
@@ -88,18 +91,18 @@ async def main_loop():
         data = {d['cert_fingerprint_sha256']: (d['cert_type'], d['_content'])
                 for d in certs}
         try:
-            pan_chainguard.util.write_cert_archive(
+            pan_chainguard_util.write_cert_archive(
                 path=args.certs_new, data=data)
-        except pan_chainguard.util.UtilError as e:
+        except pan_chainguard_util.UtilError as e:
             print(str(e), file=sys.stderr)
             sys.exit(1)
 
 
 def get_certs(path):
     try:
-        data = pan_chainguard.util.read_cert_archive(
+        data = pan_chainguard_util.read_cert_archive(
             path=path)
-    except pan_chainguard.util.UtilError as e:
+    except pan_chainguard_util.UtilError as e:
         print(str(e), file=sys.stderr)
         sys.exit(1)
 
